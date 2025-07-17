@@ -11,7 +11,6 @@ void say_hi(void) {
     printf("hello!\n");
 }
 
-// TODO
 /**
  * Start the repl loop.
  * @param void
