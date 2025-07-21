@@ -5,28 +5,38 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-const int REPL_RUNNING = 1;
-const int BUFFER_SIZE = 2048; 
-const int CURRENT_COMMAND = 1;
-const char COMMAND_TERMINATOR = ';';
-const char* EXIT_REPL_CMD = ".exit";
+#define REPL_RUNNING true
+#define BUFFER_SIZE 2048 
+#define CURRENT_COMMAND true
+#define COMMAND_TERMINATOR ';'
+#define EXIT_REPL_CMD ".exit"
+#define GET_LINE_ERROR -1
 
 /** 
- * NEVER DELETE THIS FUNCTION IT IS CRUCIAL FOR THE PROGRAM TO WORK!
- * Prints greeting to the user.
- * @param void
+ *                 .
+ *                ":"
+ *              ___:____     |"\/"|
+ *            ,'        `.    \  /
+ *            |  O        \___/  |
+ * ~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~^~
+ * "Whale hello there!""
  */
 void say_hi(void) {
-    printf("hello!\n");
+    printf("hello there!\n");
 }
 
 /**
- * Start the repl loop.
- * @param void
+ * Start the repl loop. This loop will build commands, until terminator is
+ * reached. 
  */
 void start_repl(void) {
     while (REPL_RUNNING) {
         char* command_buffer = calloc(BUFFER_SIZE, sizeof(char));
+        if (!command_buffer) {
+            printf("Error: failed to allocate memory for command buffer.");
+            exit(EXIT_FAILURE);
+        }
+
         bool buffer_limit_exceeded = false; 
         bool first_loop_run = true; 
 
@@ -37,23 +47,21 @@ void start_repl(void) {
                 printf("     > "); 
             } 
 
-            char* input_buffer = parse_repl_input();
+            char* input_buffer = read_repl_input();
             if (!input_buffer) {
                 break;
             }
 
             if (first_loop_run) {
                 if (strcmp(input_buffer, EXIT_REPL_CMD) == 0) {
-                    strcat(command_buffer, input_buffer);
-                    free(input_buffer);
+                    concatStrAndFree(command_buffer, input_buffer);
                     break;
                 }
             }
 
             first_loop_run = false;
 
-            strcat(command_buffer, input_buffer);
-            free(input_buffer);
+            concatStrAndFree(command_buffer, input_buffer);
 
             buffer_limit_exceeded = is_buffer_len_exceeded(command_buffer);
             if (buffer_limit_exceeded) {
@@ -82,23 +90,22 @@ void start_repl(void) {
 }
 
 /**
- * Parse user input into memory.
- * @param void
- * @returns char* that points to the input buffer. 
+ * Read user input into memory.
+ * @return char* that points to the input buffer. Returns Null on an error. 
  */
-char* parse_repl_input(void) {
+char* read_repl_input(void) {
     size_t len = 0;
     char* buffer = NULL;
 
     int byte_count = getline(&buffer, &len, stdin);
 
-    if (byte_count == -1) {
+    if (byte_count == GET_LINE_ERROR) {
         free(buffer);
         return NULL;
     }
 
     int buffer_len = strlen(buffer); 
-    if (buffer_len >= 1 && buffer[buffer_len - 1] == '\n') {
+    if (buffer_len > 0 && buffer[buffer_len - 1] == '\n') {
         buffer[buffer_len - 1] = '\0';
     }
 
@@ -107,8 +114,8 @@ char* parse_repl_input(void) {
 
 /**
  * Determines whether the current command is done being built.
- * @param char* points to the command buffer. 
- * @returns bool whether the command is completed or not. 
+ * @param char* command_buffer points to the command buffer. 
+ * @return bool whether the command is completed or not. 
  */
 bool is_command_complete(const char* command_buffer) {
     size_t buffer_len = strlen(command_buffer);
@@ -126,7 +133,7 @@ bool is_command_complete(const char* command_buffer) {
 
 /**
  * Determines if the buffer length has exceeded the limit.
- * @param char* points to the command buffer. 
+ * @param char* command_buffer points to the command buffer. 
  * @return bool whether the buffer's max length has been exceeded.
  */
 bool is_buffer_len_exceeded(const char* command_buffer) {
@@ -138,4 +145,15 @@ bool is_buffer_len_exceeded(const char* command_buffer) {
     }
 
     return false;
+}
+
+/**
+ * Concatenate 2 char* and then free the second one.
+ * @param char* dest is the char* that will contain the new string.
+ * @param char* source will be concatenated to dest, then freed from memory. 
+ * @return void
+ */
+void concatStrAndFree(char* dest, char* source) {
+    strcat(dest, source);
+    free(source);
 }
