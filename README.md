@@ -46,3 +46,6 @@ Output: `[SELECT] [IDENTIFIER:name] [FROM] [IDENTIFIER:users] [SEMICOLON]`
 
 ## Links
 - https://cstack.github.io/db_tutorial/
+
+
+I GOTTA FIX EVERYTIME YOU PRESSES ENTER WITH AN EMPTY LINE I NEED TO HAVE THE CMD PART PRINT!!! SO ye...
