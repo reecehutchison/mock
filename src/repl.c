@@ -1,5 +1,4 @@
 #include "repl.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -9,7 +8,7 @@
 #define BUFFER_SIZE 2048 
 #define CURRENT_COMMAND true
 #define COMMAND_TERMINATOR ';'
-#define EXIT_REPL_CMD ".exit"
+#define EXIT_REPL_CMD ".exit "
 #define GET_LINE_ERROR -1
 
 /** 
@@ -68,8 +67,8 @@ void start_repl(void) {
                 break;
             }
 
-            bool finished_parsing = is_command_complete(command_buffer);
-            if (finished_parsing) {
+            bool finished_reading = is_command_complete(command_buffer);
+            if (finished_reading) {
                 break;
             }
         }
@@ -104,10 +103,7 @@ char* read_repl_input(void) {
         return NULL;
     }
 
-    int buffer_len = strlen(buffer); 
-    if (buffer_len > 0 && buffer[buffer_len - 1] == '\n') {
-        buffer[buffer_len - 1] = '\0';
-    }
+    stripNewlines(buffer);
 
     return buffer;
 }
@@ -156,4 +152,23 @@ bool is_buffer_len_exceeded(const char* command_buffer) {
 void concatStrAndFree(char* dest, char* source) {
     strcat(dest, source);
     free(source);
+}
+
+/**
+ * Goes through the input, and replaces all newlines with spaces.
+ * @param source is the input that will be striped of it's newlines. 
+ */
+void stripNewlines(char* source) {
+    int n = strlen(source);
+
+    for (int i = 0; i < n; i++) {
+        if (source[i] == '\n') {
+            source[i] = ' ';
+        }
+    }
+
+    if (source[n - 2] == ';') {
+        source[n - 2] = ' ';
+        source[n - 1] = ';';
+    }
 }
